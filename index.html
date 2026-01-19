@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Face Blur</title>
+  <style>
+    body { margin: 0; }
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div style="position:fixed; top:10px; left:10px; z-index:10; background:#fff; padding:10px; border-radius:6px;">
+  <button id="toggleBlur">Blur: ON</button>
+  <br><br>
+  Blur Strength:
+  <input type="range" id="blurRange" min="5" max="40" value="20">
+  <br><br>
+  <button id="startRec">Start Recording</button>
+  <button id="stopRec" disabled>Stop Recording</button>
+</div>
+
+
+<video id="video" autoplay muted></video>
+<canvas id="canvas"></canvas>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let blurEnabled = true;
+let blurAmount = 20;
+let mediaRecorder;
+let recordedChunks = [];
+
+const startBtn = document.getElementById("startRec");
+const stopBtn = document.getElementById("stopRec");
+
+startBtn.onclick = () => {
+  recordedChunks = [];
+  const stream = canvas.captureStream(30);
+  mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+  mediaRecorder.ondataavailable = e => {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: "video/webm" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "blurred-video.webm";
+    a.click();
+  };
+
+  mediaRecorder.start();
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+};
+
+stopBtn.onclick = () => {
+  mediaRecorder.stop();
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+};
+
+
+const toggleBtn = document.getElementById("toggleBlur");
+const blurSlider = document.getElementById("blurRange");
+
+toggleBtn.onclick = () => {
+  blurEnabled = !blurEnabled;
+  toggleBtn.innerText = blurEnabled ? "Blur: ON" : "Blur: OFF";
+};
+
+blurSlider.oninput = () => {
+  blurAmount = blurSlider.value;
+};
+
+
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => video.srcObject = stream);
+
+const faceDetection = new FaceDetection({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`
+});
+
+faceDetection.setOptions({
+  model: "short",
+  minDetectionConfidence: 0.6
+});
+
+faceDetection.onResults(results => {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  if (results.detections) {
+    results.detections.forEach(face => {
+      const box = face.boundingBox;
+      if (blurEnabled) {
+  ctx.filter = `blur(${blurAmount}px)`;
+} else {
+  ctx.filter = "none";
+}
+
+      ctx.drawImage(
+        canvas,
+        box.xCenter * canvas.width - box.width * canvas.width / 2,
+        box.yCenter * canvas.height - box.height * canvas.height / 2,
+        box.width * canvas.width,
+        box.height * canvas.height,
+        box.xCenter * canvas.width - box.width * canvas.width / 2,
+        box.yCenter * canvas.height - box.height * canvas.height / 2,
+        box.width * canvas.width,
+        box.height * canvas.height
+      );
+      ctx.filter = "none";
+    });
+  }
+});
+
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await faceDetection.send({ image: video });
+  },
+  width: 640,
+  height: 480
+});
+
+camera.start();
+</script>
+</body>
+</html>
