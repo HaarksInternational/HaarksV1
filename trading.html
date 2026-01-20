@@ -73,113 +73,93 @@
 </head>
 
 <body>
-  <div class="container">
-    <h1>HAARKS — Smart Trade</h1>
-    <div id="marketStatus" class="status"></div>
+<div class="container">
+  <h1>HAARKS — Smart Trade</h1>
+  <div id="marketStatus" class="status"></div>
 
-    <div class="card">
-      <div class="row">
-        <div class="label">NIFTY 50 (Previous Close)</div>
-        <div class="value" id="nifty">25,232.50</div>
-      </div>
-
-      <div class="row">
-        <div class="label">GIFT NIFTY</div>
-        <div class="value" id="gift">25,290.00</div>
-      </div>
-
-      <div class="row diff">
-        <div class="label">Difference</div>
-        <div class="value" id="diff"></div>
-      </div>
-
-      <div class="row diff">
-        <div class="label">Market Bias</div>
-        <div class="value" id="bias"></div>
-      </div>
+  <div class="card">
+    <div class="row">
+      <div class="label">NIFTY 50 (Previous Close)</div>
+      <div class="value" id="nifty">25,232.50</div>
     </div>
 
-    <div class="footer">
-      Data logic only • No broker connection • API-safe demo (In progress)<br>
-      © HAARKS
+    <div class="row">
+      <div class="label">GIFT NIFTY</div>
+      <div class="value" id="gift">25,290.00</div>
+    </div>
+
+    <div class="row diff">
+      <div class="label">Difference</div>
+      <div class="value" id="diff"></div>
+    </div>
+
+    <div class="row diff">
+      <div class="label">Market Bias</div>
+      <div class="value" id="bias"></div>
     </div>
   </div>
 
-<script>
-/* ---------------- MARKET STATUS ---------------- */
-function marketStatus() {
-  const now = new Date();
-  const day = now.getDay();
-  const minutes = now.getHours() * 60 + now.getMinutes();
+  <div class="footer">
+    Data logic only • No broker connection • API-safe demo (In progress)<br>
+    © HAARKS
+  </div>
 
-  if (day === 0 || day === 6) return "🔴 Market is CLOSED";
-  if (minutes >= 555 && minutes <= 930) return "🟢 Market is OPEN";
-  return "🔴 Market is CLOSED";
-}
-
-const statusEl = document.getElementById("marketStatus");
-const statusText = marketStatus();
-statusEl.innerText = statusText;
-statusEl.className = "status " + (statusText.includes("OPEN") ? "open" : "closed");
-
-/* ---------------- CORE LOGIC ---------------- */
-const nifty = 25232.5;
-const gift = 25290.0;
-
-const diff = gift - nifty;
-
-const diffEl = document.getElementById("diff");
-const biasEl = document.getElementById("bias");
-
-diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2);
-
-/* CE / PE / NO TRADE LOGIC */
-if (diff > 20) {
-  biasEl.innerText = "Bullish → CALL bias";
-  biasEl.className = "value bullish";
-  if (Math.abs(diff) >= 30) alert("⚠️ Strong bullish gap detected");
-}
-else if (diff < -20) {
-  biasEl.innerText = "Bearish → PUT bias";
-  biasEl.className = "value bearish";
-  if (Math.abs(diff) >= 30) alert("⚠️ Strong bearish gap detected");
-}
-else {
-  biasEl.innerText = "Neutral → No trade zone";
-  biasEl.className = "value neutral";
-}
-</script>
-</body>
-</html>
+  <!-- LIVE GIFT NIFTY -->
+  <div style="margin-top:30px;">
+    <iframe
+      src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=1&theme=dark&style=1&timezone=Asia/Kolkata"
+      style="width:100%; height:420px; border-radius:14px; border:none;"
+      loading="lazy">
+    </iframe>
+  </div>
+</div>
 
 <script>
-/* ===== MARKET STATUS (IST) ===== */
+/* ===== MARKET STATUS (IST ONLY) ===== */
 function isMarketOpenIST() {
   const now = new Date();
   const ist = new Date(
     now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
   );
-  const day = ist.getDay(); // 0 = Sun, 6 = Sat
+  const day = ist.getDay();
   const hour = ist.getHours();
   const min = ist.getMinutes();
 
   if (day === 0 || day === 6) return false;
   if (hour < 9 || (hour === 9 && min < 15)) return false;
   if (hour > 15 || (hour === 15 && min > 30)) return false;
-
   return true;
 }
 
-const statusEl = document.querySelector(".status");
+const statusEl = document.getElementById("marketStatus");
 if (isMarketOpenIST()) {
-  statusEl.innerHTML = "🟢 Market is OPEN";
-  statusEl.style.color = "#00ff9c";
+  statusEl.textContent = "🟢 Market is OPEN";
+  statusEl.classList.add("open");
+} else {
+  statusEl.textContent = "🔴 Market is CLOSED";
+  statusEl.classList.add("closed");
+}
+
+/* ===== CORE LOGIC ===== */
+const nifty = 25232.5;
+const gift = 25290.0;
+
+const diff = gift - nifty;
+document.getElementById("diff").innerText =
+  (diff > 0 ? "+" : "") + diff.toFixed(2);
+
+const biasEl = document.getElementById("bias");
+
+if (diff > 20) {
+  biasEl.innerText = "Bullish → CALL bias";
+  biasEl.className = "value bullish";
+} else if (diff < -20) {
+  biasEl.innerText = "Bearish → PUT bias";
+  biasEl.className = "value bearish";
+} else {
+  biasEl.innerText = "Neutral → No trade zone";
+  biasEl.className = "value neutral";
 }
 </script>
-<div style="margin-top:30px;">
-  <iframe
-    src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=1&theme=dark&style=1&timezone=Asia/Kolkata"
-    style="width:100%; height:420px; border-radius:14px; border:none;"
-    loading="lazy">
-  </iframe>
-</div>
+</body>
+</html>
