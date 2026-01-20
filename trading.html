@@ -64,6 +64,7 @@ h1 {
   font-size: 12px;
   color: #7b87a7;
   margin-top: 12px;
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -102,7 +103,7 @@ h1 {
 
   <!-- NIFTY 50 -->
   <div class="panel">
-    <div class="label" style="margin-bottom:8px;">NIFTY 50 — Live</div>
+    <div class="label" style="margin-bottom:8px;">NIFTY 50 — Live (TradingView)</div>
     <iframe
       src="https://s.tradingview.com/widgetembed/?symbol=NSE:NIFTY&interval=5&theme=dark&style=1&timezone=Asia/Kolkata"
       style="width:100%;height:360px;border:none;border-radius:10px;">
@@ -111,9 +112,9 @@ h1 {
 
   <!-- GIFT NIFTY -->
   <div class="panel">
-    <div class="label" style="margin-bottom:8px;">GIFT NIFTY — Live</div>
+    <div class="label" style="margin-bottom:8px;">GIFT NIFTY — Live (TradingView)</div>
     <iframe
-      src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=5&theme=dark&style=1&timezone=Asia/Kolkata"
+      src="https://s.tradingview.com/widgetembed/?symbol=SGX:GIFTNIFTY&interval=5&theme=dark&style=1&timezone=Asia/Kolkata"
       style="width:100%;height:360px;border:none;border-radius:10px;">
     </iframe>
   </div>
@@ -121,8 +122,10 @@ h1 {
 </div>
 
 <div class="footer">
-Data logic only • No broker connection • API-safe demo (In progress)<br>
-© HAARKS
+  Data logic only • No broker connection • API-safe demo (In progress)<br>
+  Decision-support system — not investment advice<br>
+  AI logic & structure assisted by ChatGPT<br>
+  © HAARKS
 </div>
 
 </div>
@@ -130,7 +133,9 @@ Data logic only • No broker connection • API-safe demo (In progress)<br>
 <script>
 /* ===== MARKET STATUS (IST) ===== */
 function isMarketOpenIST() {
-  const ist = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
+  const ist = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
   const day = ist.getDay();
   const h = ist.getHours();
   const m = ist.getMinutes();
@@ -150,7 +155,7 @@ if (isMarketOpenIST()) {
   statusEl.className = "status closed";
 }
 
-/* ===== LOGIC ===== */
+/* ===== BIAS LOGIC (DEMO VALUES) ===== */
 const nifty = 25232.5;
 const gift = 25290.0;
 const diff = gift - nifty;
