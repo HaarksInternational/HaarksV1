@@ -1,176 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>HAARKS — NIFTY Trading Helper</title>
+<meta charset="UTF-8" />
+<title>HAARKS — NIFTY Helper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #020617;
-  color: #fff;
-  padding: 20px;
-}
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0b1a2d, #050b16);
+    color: #fff;
+  }
 
-h1 { font-size: 26px; margin: 0; }
-.brand { font-weight: bold; letter-spacing: 1px; }
-.status { margin-top: 6px; color: #ff4d4d; font-weight: bold; }
+  .container {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 20px;
+  }
 
-.panel {
-  margin-top: 18px;
-  background: #0b1220;
-  padding: 18px;
-  border-radius: 14px;
-  max-width: 600px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-}
+  h1 {
+    margin-bottom: 6px;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
 
-label {
-  font-size: 12px;
-  color: #9ca3af;
-}
+  .status {
+    font-size: 14px;
+    color: #ff4d4d;
+    margin-bottom: 20px;
+  }
 
-input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  border: none;
-  font-size: 14px;
-}
+  .card {
+    background: linear-gradient(180deg, #0f203a, #0a162a);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
 
-button {
-  padding: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: bold;
-  background: #2563eb;
-  color: #fff;
-  cursor: pointer;
-}
+  .row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 16px;
+  }
 
-.section { margin-top: 16px; }
-.call { color: #22c55e; }
-.put { color: #ef4444; }
-.level { color: #38bdf8; }
-.small { font-size: 12px; color: #9ca3af; }
+  .label {
+    color: #9db2d1;
+  }
 
-iframe {
-  margin-top: 22px;
-  width: 100%;
-  height: 520px;
-  border: none;
-  border-radius: 14px;
-}
+  .value {
+    font-weight: bold;
+  }
+
+  .diff {
+    font-size: 20px;
+    margin-top: 12px;
+  }
+
+  .bullish { color: #00ff9c; }
+  .bearish { color: #ff5c5c; }
+  .neutral { color: #ffd166; }
+
+  .footer {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #7c8fb3;
+  }
 </style>
 </head>
 
 <body>
+  <div class="container">
+    <h1>HAARKS — NIFTY Trading Helper</h1>
+    <div class="status">🔴 Market is CLOSED</div>
 
-<h1 class="brand">HAARKS — NIFTY Trading Helper</h1>
-<div class="status">🔴 Market is CLOSED — Planning Mode</div>
+    <div class="card">
+      <div class="row">
+        <div class="label">NIFTY 50 (Previous Close)</div>
+        <div class="value" id="nifty">25,232.50</div>
+      </div>
 
-<div class="panel">
+      <div class="row">
+        <div class="label">GIFT NIFTY</div>
+        <div class="value" id="gift">25,290.00</div>
+      </div>
 
-<label>Previous Day High</label>
-<input id="ph" placeholder="e.g. 22640">
+      <div class="row diff">
+        <div class="label">Difference</div>
+        <div class="value" id="diff"></div>
+      </div>
 
-<label>Previous Day Low</label>
-<input id="pl" placeholder="e.g. 22410">
+      <div class="row diff">
+        <div class="label">Market Bias</div>
+        <div class="value" id="bias"></div>
+      </div>
+    </div>
 
-<label>Previous Day Close</label>
-<input id="pc" placeholder="e.g. 22520">
-
-<label>Opening Range High (9:15–9:30)</label>
-<input id="orh" placeholder="e.g. 22580">
-
-<label>Opening Range Low (9:15–9:30)</label>
-<input id="orl" placeholder="e.g. 22500">
-
-<button onclick="calculate()">Generate Trading Plan</button>
-
-<div id="output"></div>
-</div>
-
-<!-- NIFTY 50 CHART -->
-<iframe
-  src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ANIFTY&interval=5&timezone=Asia%2FKolkata&theme=dark&style=1&allow_symbol_change=false&enable_publishing=false">
-</iframe>
-
-<div class="small">
-Chart via TradingView (exchange-delayed). No order execution.
-</div>
+    <div class="footer">
+      Data logic only • No broker connection • API-safe demo<br>
+      © HAARKS
+    </div>
+  </div>
 
 <script>
-function round(x) { return Math.round(x); }
-function round50(x) { return Math.round(x / 50) * 50; }
+  const nifty = 25232.5;
+  const gift = 25290.0;
 
-function calculate() {
-  const H = +ph.value;
-  const L = +pl.value;
-  const C = +pc.value;
-  const ORH = +orh.value;
-  const ORL = +orl.value;
+  const diff = gift - nifty;
+  const diffEl = document.getElementById("diff");
+  const biasEl = document.getElementById("bias");
 
-  if (!H || !L || !C || !ORH || !ORL) {
-    alert("Fill all inputs");
-    return;
+  diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2);
+
+  if (diff > 20) {
+    biasEl.innerText = "Bullish → CALL bias";
+    biasEl.className = "value bullish";
+  } else if (diff < -20) {
+    biasEl.innerText = "Bearish → PUT bias";
+    biasEl.className = "value bearish";
+  } else {
+    biasEl.innerText = "Neutral → No trade zone";
+    biasEl.className = "value neutral";
   }
-
-  /* CPR */
-  const P = (H + L + C) / 3;
-  const BC = (H + L) / 2;
-  const TC = (2 * P) - BC;
-
-  /* ORB */
-  const orbBuy = ORH;
-  const orbSell = ORL;
-
-  /* Liquidity Sweep Zones */
-  const sweepHigh = H + 10;
-  const sweepLow = L - 10;
-
-  /* Option Strikes */
-  const atm = round50(P);
-
-  output.innerHTML = `
-  <div class="section level">
-    📊 CPR Levels<br>
-    Pivot: <b>${round(P)}</b><br>
-    BC: <b>${round(BC)}</b><br>
-    TC: <b>${round(TC)}</b>
-  </div>
-
-  <div class="section call">
-    📈 CALL (CE)<br>
-    Entry: Above ORH <b>${orbBuy}</b><br>
-    Target: <b>${round(orbBuy + (H - L))}</b><br>
-    SL: Below ORL <b>${orbSell}</b><br>
-    Strike: <b>${atm + 50} CE</b>
-  </div>
-
-  <div class="section put">
-    📉 PUT (PE)<br>
-    Entry: Below ORL <b>${orbSell}</b><br>
-    Target: <b>${round(orbSell - (H - L))}</b><br>
-    SL: Above ORH <b>${orbBuy}</b><br>
-    Strike: <b>${atm - 50} PE</b>
-  </div>
-
-  <div class="section small">
-    ⚠️ Liquidity Sweep Zones<br>
-    High Sweep: ${sweepHigh}<br>
-    Low Sweep: ${sweepLow}<br><br>
-    No-Trade Zone: CPR Range<br>
-    Strategy: ORB + Fake Break Reversal
-  </div>
-  `;
-}
 </script>
-
 </body>
 </html>
