@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>HAARKS — NIFTY Helper</title>
+<title>HAARKS — Smart Trade</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
@@ -27,9 +27,11 @@
 
   .status {
     font-size: 14px;
-    color: #ff4d4d;
     margin-bottom: 20px;
   }
+
+  .closed { color: #ff4d4d; }
+  .open { color: #00ff9c; }
 
   .card {
     background: linear-gradient(180deg, #0f203a, #0a162a);
@@ -72,8 +74,8 @@
 
 <body>
   <div class="container">
-    <h1>HAARKS — NIFTY Trading Helper</h1>
-    <div class="status">🔴 Market is CLOSED</div>
+    <h1>HAARKS — Smart Trade</h1>
+    <div id="marketStatus" class="status"></div>
 
     <div class="card">
       <div class="row">
@@ -98,31 +100,54 @@
     </div>
 
     <div class="footer">
-      Data logic only • No broker connection • API-safe demo<br>
+      Data logic only • No broker connection • API-safe demo (In progress)<br>
       © HAARKS
     </div>
   </div>
 
 <script>
-  const nifty = 25232.5;
-  const gift = 25290.0;
+/* ---------------- MARKET STATUS ---------------- */
+function marketStatus() {
+  const now = new Date();
+  const day = now.getDay();
+  const minutes = now.getHours() * 60 + now.getMinutes();
 
-  const diff = gift - nifty;
-  const diffEl = document.getElementById("diff");
-  const biasEl = document.getElementById("bias");
+  if (day === 0 || day === 6) return "🔴 Market is CLOSED";
+  if (minutes >= 555 && minutes <= 930) return "🟢 Market is OPEN";
+  return "🔴 Market is CLOSED";
+}
 
-  diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2);
+const statusEl = document.getElementById("marketStatus");
+const statusText = marketStatus();
+statusEl.innerText = statusText;
+statusEl.className = "status " + (statusText.includes("OPEN") ? "open" : "closed");
 
-  if (diff > 20) {
-    biasEl.innerText = "Bullish → CALL bias";
-    biasEl.className = "value bullish";
-  } else if (diff < -20) {
-    biasEl.innerText = "Bearish → PUT bias";
-    biasEl.className = "value bearish";
-  } else {
-    biasEl.innerText = "Neutral → No trade zone";
-    biasEl.className = "value neutral";
-  }
+/* ---------------- CORE LOGIC ---------------- */
+const nifty = 25232.5;
+const gift = 25290.0;
+
+const diff = gift - nifty;
+
+const diffEl = document.getElementById("diff");
+const biasEl = document.getElementById("bias");
+
+diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2);
+
+/* CE / PE / NO TRADE LOGIC */
+if (diff > 20) {
+  biasEl.innerText = "Bullish → CALL bias";
+  biasEl.className = "value bullish";
+  if (Math.abs(diff) >= 30) alert("⚠️ Strong bullish gap detected");
+}
+else if (diff < -20) {
+  biasEl.innerText = "Bearish → PUT bias";
+  biasEl.className = "value bearish";
+  if (Math.abs(diff) >= 30) alert("⚠️ Strong bearish gap detected");
+}
+else {
+  biasEl.innerText = "Neutral → No trade zone";
+  biasEl.className = "value neutral";
+}
 </script>
 </body>
 </html>
