@@ -13,42 +13,33 @@ body {
   padding: 20px;
 }
 
-h1 {
-  margin: 0;
-  font-size: 26px;
-}
+h1 { font-size: 26px; margin: 0; }
+.brand { font-weight: bold; letter-spacing: 1px; }
 
-.brand {
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.status {
-  margin-top: 6px;
-  color: #ff4d4d;
-  font-weight: bold;
-}
+.status { margin-top: 6px; color: #ff4d4d; font-weight: bold; }
 
 .panel {
   margin-top: 20px;
   background: #0b1220;
   padding: 18px;
   border-radius: 14px;
-  max-width: 520px;
+  max-width: 560px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.4);
 }
+
+label { font-size: 13px; color: #9ca3af; }
 
 input {
   width: 100%;
   padding: 8px;
   margin-top: 6px;
+  margin-bottom: 10px;
   border-radius: 6px;
   border: none;
   font-size: 14px;
 }
 
 button {
-  margin-top: 12px;
   padding: 10px;
   width: 100%;
   border: none;
@@ -60,17 +51,10 @@ button {
   cursor: pointer;
 }
 
-.section {
-  margin-top: 18px;
-}
-
+.section { margin-top: 16px; }
 .call { color: #22c55e; }
 .put { color: #ef4444; }
-
-.small {
-  font-size: 12px;
-  color: #9ca3af;
-}
+.small { font-size: 12px; color: #9ca3af; }
 
 iframe {
   margin-top: 25px;
@@ -85,71 +69,106 @@ iframe {
 <body>
 
 <h1 class="brand">HAARKS — NIFTY Trading Helper</h1>
-<div class="status">🔴 Market is CLOSED</div>
+<div class="status">🔴 Market is CLOSED — Planning Mode</div>
 
 <div class="panel">
-  <div class="small">Enter Previous Trading Day Levels</div>
 
-  <label>Previous High</label>
-  <input id="high" type="number" placeholder="e.g. 22640">
+<label>Previous High</label>
+<input id="high" type="number" placeholder="e.g. 22640">
 
-  <label>Previous Low</label>
-  <input id="low" type="number" placeholder="e.g. 22410">
+<label>Previous Low</label>
+<input id="low" type="number" placeholder="e.g. 22410">
 
-  <button onclick="calculate()">Generate Levels</button>
+<button onclick="generate()">Generate Trade Plan</button>
 
-  <div id="output"></div>
+<div id="plan"></div>
+
+<hr style="margin:18px 0; border-color:#1f2937">
+
+<label>Manual NIFTY Price (for alerts)</label>
+<input id="livePrice" type="number" placeholder="Enter current NIFTY price">
+
+<label>Set Alert Price</label>
+<input id="alertPrice" type="number" placeholder="Alert trigger level">
+
+<button onclick="setAlert()">Set Alert</button>
+
+<div id="alertStatus" class="small"></div>
+
 </div>
 
-<!-- TradingView Embed -->
 <iframe
-  src="https://s.tradingview.com/widgetembed/?symbol=NSE:NIFTY&interval=5&theme=dark&style=1&toolbarbg=%230b1220&enable_publishing=false&hide_top_toolbar=false"
+  src="https://s.tradingview.com/widgetembed/?symbol=NSE:NIFTY&interval=5&theme=dark&style=1&toolbarbg=%230b1220&enable_publishing=false"
 ></iframe>
 
 <div class="small">
-  Chart via TradingView (exchange-delayed). No order placement.
+Charts via TradingView (exchange-delayed). No broker execution.
 </div>
 
 <script>
-function calculate() {
-  const high = parseFloat(document.getElementById("high").value);
-  const low = parseFloat(document.getElementById("low").value);
+let alertTriggered = false;
+
+function round50(x) {
+  return Math.round(x / 50) * 50;
+}
+
+function generate() {
+  const high = +highEl.value;
+  const low = +lowEl.value;
 
   if (!high || !low || high <= low) {
-    alert("Enter valid High & Low");
+    alert("Enter valid high & low");
     return;
   }
 
   const range = high - low;
-  const ceEntry = high;
-  const ceSL = low;
-  const ceTarget = Math.round(high + range);
+  const atm = round50((high + low) / 2);
 
-  const peEntry = low;
-  const peSL = high;
-  const peTarget = Math.round(low - range);
+  const ceStrike = atm + 50;
+  const peStrike = atm - 50;
 
-  document.getElementById("output").innerHTML = `
+  plan.innerHTML = `
     <div class="section call">
       📈 CALL (CE)<br>
-      Entry: Above <b>${ceEntry}</b><br>
-      Stop Loss: Below <b>${ceSL}</b><br>
-      Target: <b>${ceTarget}</b>
+      Entry: Above <b>${high}</b><br>
+      SL: Below <b>${low}</b><br>
+      Target: <b>${high + range}</b><br>
+      Suggested Strike: <b>${ceStrike} CE</b>
     </div>
 
     <div class="section put">
       📉 PUT (PE)<br>
-      Entry: Below <b>${peEntry}</b><br>
-      Stop Loss: Above <b>${peSL}</b><br>
-      Target: <b>${peTarget}</b>
+      Entry: Below <b>${low}</b><br>
+      SL: Above <b>${high}</b><br>
+      Target: <b>${low - range}</b><br>
+      Suggested Strike: <b>${peStrike} PE</b>
     </div>
 
     <div class="section small">
-      ⚠️ No-Trade Zone: ${low} – ${high}<br>
-      RR used: 1:2
+      No-Trade Zone: ${low} – ${high}<br>
+      Strategy: Breakout + 1:2 RR
     </div>
   `;
 }
+
+function setAlert() {
+  const price = +alertPrice.value;
+  if (!price) return;
+
+  localStorage.setItem("haarksAlert", price);
+  alertTriggered = false;
+  alertStatus.innerText = "Alert set at " + price;
+}
+
+setInterval(() => {
+  const current = +livePrice.value;
+  const alertAt = +localStorage.getItem("haarksAlert");
+
+  if (!alertTriggered && current && alertAt && current >= alertAt) {
+    alertTriggered = true;
+    alert("HAARKS ALERT 🔔 Price reached " + alertAt);
+  }
+}, 3000);
 </script>
 
 </body>
