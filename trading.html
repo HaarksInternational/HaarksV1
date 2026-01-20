@@ -1,93 +1,59 @@
-<script>
-/* =====================================================
-   MARKET TIME CHECK
-===================================================== */
-function isMarketOpen() {
-  const now = new Date();
-  const day = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HAARKS — NIFTY Trading Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  if (day === 0 || day === 6) return false;
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #020617);
+      color: #ffffff;
+    }
 
-  const time = hours * 60 + minutes;
-  return time >= 555 && time <= 930;
-}
+    h1 {
+      margin-bottom: 10px;
+    }
 
-const marketOpen = isMarketOpen();
+    .status {
+      margin: 12px 0;
+      font-size: 16px;
+    }
 
-/* =====================================================
-   FETCH FREE DELAYED NIFTY DATA (STOOQ)
-===================================================== */
-async function loadNiftyData() {
-  const url = "https://stooq.com/q/d/l/?s=^nsei&i=d"; // CSV
+    .card {
+      background: rgba(255,255,255,0.08);
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 14px;
+    }
 
-  const response = await fetch(url);
-  const text = await response.text();
+    .green { color: #22c55e; }
+    .red { color: #ef4444; }
+  </style>
+</head>
 
-  const rows = text.trim().split("\n");
-  const lastRow = rows[rows.length - 1].split(",");
+<body>
 
-  const date = lastRow[0];
-  const open = parseFloat(lastRow[1]);
-  const high = parseFloat(lastRow[2]);
-  const low = parseFloat(lastRow[3]);
-  const close = parseFloat(lastRow[4]);
+  <h1>HAARKS — NIFTY Trading Helper</h1>
 
-  renderStrategy({ date, open, high, low, close });
-}
+  <div class="status red">🔴 Market is CLOSED</div>
 
-/* =====================================================
-   STRATEGY LOGIC (CALL / PUT)
-===================================================== */
-function renderStrategy(data) {
-  const { date, high, low, close } = data;
+  <div class="card">
+    <strong>PLAN FOR NEXT DAY</strong><br><br>
 
-  let bias = "";
-  let callPlan = "";
-  let putPlan = "";
+    📈 CALL (CE)<br>
+    Entry: Above Previous High<br>
+    Stop Loss: Below Rejection Candle<br>
+    Target: 1:2 Risk Reward<br><br>
 
-  if (marketOpen) {
-    bias = "LIVE MARKET (Delayed Data View)";
-  } else {
-    bias = "MARKET CLOSED — NEXT DAY PLAN";
-  }
+    📉 PUT (PE)<br>
+    Entry: Below Previous Low<br>
+    Stop Loss: Above Rejection Candle<br>
+    Target: 1:2 Risk Reward
+  </div>
 
-  callPlan = `
-📈 <b>CALL (CE)</b><br>
-Entry: Above <b>${high}</b><br>
-Stop Loss: Below ${low}<br>
-Target: ${(high + (high - low)).toFixed(2)} (1:2 RR)<br>
-Logic: Break & hold above previous high
-`;
-
-  putPlan = `
-📉 <b>PUT (PE)</b><br>
-Entry: Below <b>${low}</b><br>
-Stop Loss: Above ${high}<br>
-Target: ${(low - (high - low)).toFixed(2)} (1:2 RR)<br>
-Logic: Break & hold below previous low
-`;
-
-  document.getElementById("status").innerHTML =
-    marketOpen ? "🟢 Market is OPEN" : "🔴 Market is CLOSED";
-
-  document.getElementById("analysis").innerHTML = `
-<b>Date Used:</b> ${date}<br>
-<b>NIFTY Close:</b> ${close}<br><br>
-
-<b>Market Bias:</b> ${bias}<br><br>
-
-<div style="margin-bottom:16px;">${callPlan}</div>
-<div>${putPlan}</div>
-
-<hr style="opacity:0.3">
-<small>⚠️ Data is delayed. For learning & planning only.</small>
-`;
-}
-
-/* =====================================================
-   START
-===================================================== */
-loadNiftyData();
-</script>
+</body>
+</html>
