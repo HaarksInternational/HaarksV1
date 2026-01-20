@@ -151,3 +151,35 @@ else {
 </script>
 </body>
 </html>
+
+<script>
+/* ===== MARKET STATUS (IST) ===== */
+function isMarketOpenIST() {
+  const now = new Date();
+  const ist = new Date(
+    now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+  const day = ist.getDay(); // 0 = Sun, 6 = Sat
+  const hour = ist.getHours();
+  const min = ist.getMinutes();
+
+  if (day === 0 || day === 6) return false;
+  if (hour < 9 || (hour === 9 && min < 15)) return false;
+  if (hour > 15 || (hour === 15 && min > 30)) return false;
+
+  return true;
+}
+
+const statusEl = document.querySelector(".status");
+if (isMarketOpenIST()) {
+  statusEl.innerHTML = "🟢 Market is OPEN";
+  statusEl.style.color = "#00ff9c";
+}
+</script>
+<div style="margin-top:30px;">
+  <iframe
+    src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=1&theme=dark&style=1&timezone=Asia/Kolkata"
+    style="width:100%; height:420px; border-radius:14px; border:none;"
+    loading="lazy">
+  </iframe>
+</div>
