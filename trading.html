@@ -13,42 +13,35 @@ body {
   padding: 20px;
 }
 
-h1 {
-  margin: 0;
-  font-size: 26px;
-}
-
-.brand {
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.status {
-  margin-top: 6px;
-  color: #ff4d4d;
-  font-weight: bold;
-}
+h1 { font-size: 26px; margin: 0; }
+.brand { font-weight: bold; letter-spacing: 1px; }
+.status { margin-top: 6px; color: #ff4d4d; font-weight: bold; }
 
 .panel {
-  margin-top: 20px;
+  margin-top: 18px;
   background: #0b1220;
   padding: 18px;
   border-radius: 14px;
-  max-width: 520px;
+  max-width: 600px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+label {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
 input {
   width: 100%;
   padding: 8px;
-  margin-top: 6px;
+  margin-top: 4px;
+  margin-bottom: 10px;
   border-radius: 6px;
   border: none;
   font-size: 14px;
 }
 
 button {
-  margin-top: 12px;
   padding: 10px;
   width: 100%;
   border: none;
@@ -60,20 +53,14 @@ button {
   cursor: pointer;
 }
 
-.section {
-  margin-top: 18px;
-}
-
+.section { margin-top: 16px; }
 .call { color: #22c55e; }
 .put { color: #ef4444; }
-
-.small {
-  font-size: 12px;
-  color: #9ca3af;
-}
+.level { color: #38bdf8; }
+.small { font-size: 12px; color: #9ca3af; }
 
 iframe {
-  margin-top: 25px;
+  margin-top: 22px;
   width: 100%;
   height: 520px;
   border: none;
@@ -85,69 +72,102 @@ iframe {
 <body>
 
 <h1 class="brand">HAARKS — NIFTY Trading Helper</h1>
-<div class="status">🔴 Market is CLOSED</div>
+<div class="status">🔴 Market is CLOSED — Planning Mode</div>
 
 <div class="panel">
-  <div class="small">Enter Previous Trading Day Levels</div>
 
-  <label>Previous High</label>
-  <input id="high" type="number" placeholder="e.g. 22640">
+<label>Previous Day High</label>
+<input id="ph" placeholder="e.g. 22640">
 
-  <label>Previous Low</label>
-  <input id="low" type="number" placeholder="e.g. 22410">
+<label>Previous Day Low</label>
+<input id="pl" placeholder="e.g. 22410">
 
-  <button onclick="calculate()">Generate Levels</button>
+<label>Previous Day Close</label>
+<input id="pc" placeholder="e.g. 22520">
 
-  <div id="output"></div>
+<label>Opening Range High (9:15–9:30)</label>
+<input id="orh" placeholder="e.g. 22580">
+
+<label>Opening Range Low (9:15–9:30)</label>
+<input id="orl" placeholder="e.g. 22500">
+
+<button onclick="calculate()">Generate Trading Plan</button>
+
+<div id="output"></div>
 </div>
 
-<!-- TradingView Embed -->
+<!-- NIFTY 50 CHART -->
 <iframe
-  src="https://s.tradingview.com/widgetembed/?symbol=NSE:NIFTY&interval=5&theme=dark&style=1&toolbarbg=%230b1220&enable_publishing=false&hide_top_toolbar=false"
-></iframe>
+  src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ANIFTY&interval=5&timezone=Asia%2FKolkata&theme=dark&style=1&allow_symbol_change=false&enable_publishing=false">
+</iframe>
 
 <div class="small">
-  Chart via TradingView (exchange-delayed). No order placement.
+Chart via TradingView (exchange-delayed). No order execution.
 </div>
 
 <script>
-function calculate() {
-  const high = parseFloat(document.getElementById("high").value);
-  const low = parseFloat(document.getElementById("low").value);
+function round(x) { return Math.round(x); }
+function round50(x) { return Math.round(x / 50) * 50; }
 
-  if (!high || !low || high <= low) {
-    alert("Enter valid High & Low");
+function calculate() {
+  const H = +ph.value;
+  const L = +pl.value;
+  const C = +pc.value;
+  const ORH = +orh.value;
+  const ORL = +orl.value;
+
+  if (!H || !L || !C || !ORH || !ORL) {
+    alert("Fill all inputs");
     return;
   }
 
-  const range = high - low;
-  const ceEntry = high;
-  const ceSL = low;
-  const ceTarget = Math.round(high + range);
+  /* CPR */
+  const P = (H + L + C) / 3;
+  const BC = (H + L) / 2;
+  const TC = (2 * P) - BC;
 
-  const peEntry = low;
-  const peSL = high;
-  const peTarget = Math.round(low - range);
+  /* ORB */
+  const orbBuy = ORH;
+  const orbSell = ORL;
 
-  document.getElementById("output").innerHTML = `
-    <div class="section call">
-      📈 CALL (CE)<br>
-      Entry: Above <b>${ceEntry}</b><br>
-      Stop Loss: Below <b>${ceSL}</b><br>
-      Target: <b>${ceTarget}</b>
-    </div>
+  /* Liquidity Sweep Zones */
+  const sweepHigh = H + 10;
+  const sweepLow = L - 10;
 
-    <div class="section put">
-      📉 PUT (PE)<br>
-      Entry: Below <b>${peEntry}</b><br>
-      Stop Loss: Above <b>${peSL}</b><br>
-      Target: <b>${peTarget}</b>
-    </div>
+  /* Option Strikes */
+  const atm = round50(P);
 
-    <div class="section small">
-      ⚠️ No-Trade Zone: ${low} – ${high}<br>
-      RR used: 1:2
-    </div>
+  output.innerHTML = `
+  <div class="section level">
+    📊 CPR Levels<br>
+    Pivot: <b>${round(P)}</b><br>
+    BC: <b>${round(BC)}</b><br>
+    TC: <b>${round(TC)}</b>
+  </div>
+
+  <div class="section call">
+    📈 CALL (CE)<br>
+    Entry: Above ORH <b>${orbBuy}</b><br>
+    Target: <b>${round(orbBuy + (H - L))}</b><br>
+    SL: Below ORL <b>${orbSell}</b><br>
+    Strike: <b>${atm + 50} CE</b>
+  </div>
+
+  <div class="section put">
+    📉 PUT (PE)<br>
+    Entry: Below ORL <b>${orbSell}</b><br>
+    Target: <b>${round(orbSell - (H - L))}</b><br>
+    SL: Above ORH <b>${orbBuy}</b><br>
+    Strike: <b>${atm - 50} PE</b>
+  </div>
+
+  <div class="section small">
+    ⚠️ Liquidity Sweep Zones<br>
+    High Sweep: ${sweepHigh}<br>
+    Low Sweep: ${sweepLow}<br><br>
+    No-Trade Zone: CPR Range<br>
+    Strategy: ORB + Fake Break Reversal
+  </div>
   `;
 }
 </script>
