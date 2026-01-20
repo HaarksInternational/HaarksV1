@@ -1,59 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HAARKS — NIFTY Trading Helper</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<title>HAARKS — NIFTY Trading Helper</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #020617);
-      color: #ffffff;
-    }
+<style>
+  body {
+    margin: 0;
+    padding: 30px;
+    background: linear-gradient(135deg, #0b1220, #020617);
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+  }
 
-    h1 {
-      margin-bottom: 10px;
-    }
+  h1 {
+    margin-bottom: 5px;
+    font-size: 28px;
+  }
 
-    .status {
-      margin: 12px 0;
-      font-size: 16px;
-    }
+  .status {
+    color: #ff4d4d;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 
-    .card {
-      background: rgba(255,255,255,0.08);
-      padding: 16px;
-      border-radius: 12px;
-      margin-top: 14px;
-    }
+  .card {
+    background: #111827;
+    padding: 20px;
+    border-radius: 14px;
+    max-width: 520px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
 
-    .green { color: #22c55e; }
-    .red { color: #ef4444; }
-  </style>
+  .label {
+    color: #9ca3af;
+    font-size: 13px;
+  }
+
+  .section-title {
+    margin-top: 20px;
+    font-size: 18px;
+    border-bottom: 1px solid #1f2937;
+    padding-bottom: 6px;
+  }
+
+  .call {
+    color: #22c55e;
+  }
+
+  .put {
+    color: #ef4444;
+  }
+
+  .note {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-top: 15px;
+  }
+
+  .graph-box {
+    margin-top: 20px;
+    padding: 20px;
+    background: #020617;
+    border-radius: 12px;
+    border: 1px dashed #334155;
+    color: #94a3b8;
+    text-align: center;
+  }
+</style>
 </head>
 
 <body>
 
-  <h1>HAARKS — NIFTY Trading Helper</h1>
+<h1>HAARKS — NIFTY Trading Helper</h1>
+<div class="status">🔴 Market is CLOSED</div>
 
-  <div class="status red">🔴 Market is CLOSED</div>
+<div class="card">
+  <div class="label">Date:</div>
+  <div>Previous Trading Day</div>
 
-  <div class="card">
-    <strong>PLAN FOR NEXT DAY</strong><br><br>
+  <div class="label" style="margin-top:10px;">Market Bias:</div>
+  <div><strong>MARKET CLOSED — NEXT DAY PLAN</strong></div>
 
-    📈 CALL (CE)<br>
-    Entry: Above Previous High<br>
-    Stop Loss: Below Rejection Candle<br>
-    Target: 1:2 Risk Reward<br><br>
+  <div class="section-title call">📈 CALL (CE)</div>
+  <div>Entry: Above <strong>22640</strong></div>
+  <div>Stop Loss: Below <strong>22410</strong></div>
+  <div>Target: <strong>22870</strong></div>
 
-    📉 PUT (PE)<br>
-    Entry: Below Previous Low<br>
-    Stop Loss: Above Rejection Candle<br>
-    Target: 1:2 Risk Reward
+  <div class="section-title put">📉 PUT (PE)</div>
+  <div>Entry: Below <strong>22410</strong></div>
+  <div>Stop Loss: Above <strong>22640</strong></div>
+  <div>Target: <strong>22180</strong></div>
+
+  <div class="section-title">⚠️ No Trade Zone</div>
+  <div>Between <strong>22410 – 22640</strong></div>
+
+  <div class="note">
+    Levels are derived from previous high/low & rejection zones.<br>
+    Use confirmation candles before entry.
   </div>
+</div>
+
+<div class="graph-box">
+  📊 Chart View Placeholder<br><br>
+  (Graph integration pending)<br>
+  Data delayed by exchange rules
+</div>
+
+<div class="note">
+  ⚠️ Educational & planning purpose only.<br>
+  Not financial advice.
+</div>
 
 </body>
 </html>
