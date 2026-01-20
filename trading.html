@@ -1,0 +1,78 @@
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>HAARKS Trading Helper</title>
+</head>
+
+<body style="
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+">
+
+<h2>HAARKS — NIFTY Trading Helper</h2>
+
+<div id="status" style="margin-top:10px; font-size:18px;"></div>
+
+<div id="analysis" style="
+  margin-top:20px;
+  padding:16px;
+  border-radius:12px;
+  background:#020617;
+  width:320px;
+">
+</div>
+
+<script>
+/* ===== MARKET TIME CHECK ===== */
+
+function isMarketOpen() {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sunday
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  // Closed on Sat & Sun
+  if (day === 0 || day === 6) return false;
+
+  // Market hours: 9:15 to 15:30
+  const time = hours * 60 + minutes;
+  return time >= 555 && time <= 930;
+}
+
+const marketOpen = isMarketOpen();
+
+/* ===== DISPLAY STATUS ===== */
+
+document.getElementById("status").innerHTML =
+  marketOpen
+    ? "🟢 Market is OPEN"
+    : "🔴 Market is CLOSED";
+
+/* ===== BASIC THINKING (DUMMY LOGIC) ===== */
+
+let bias = "WAIT";
+let entry = "-";
+let stopLoss = "-";
+let target = "-";
+
+if (marketOpen) {
+  bias = "WAIT (Live data will come later)";
+} else {
+  bias = "PLAN FOR NEXT DAY";
+  entry = "Break previous high / low";
+  stopLoss = "Below rejection candle";
+  target = "1:2 Risk Reward";
+}
+
+document.getElementById("analysis").innerHTML = `
+<b>Market Bias:</b> ${bias}<br><br>
+<b>Entry:</b> ${entry}<br>
+<b>Stop Loss:</b> ${stopLoss}<br>
+<b>Target:</b> ${target}
+`;
+</script>
+
+</body>
+</html>
