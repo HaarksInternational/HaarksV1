@@ -1,165 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>HAARKS — Smart Trade</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle at top, #0b1a2d, #050b16);
-    color: #fff;
-  }
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #0b1220;
+  color: #e6ebf5;
+}
 
-  .container {
-    max-width: 720px;
-    margin: 40px auto;
-    padding: 20px;
-  }
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px;
+}
 
-  h1 {
-    margin-bottom: 6px;
-    font-size: 22px;
-    letter-spacing: 0.5px;
-  }
+h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
 
-  .status {
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
+.status {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
 
-  .closed { color: #ff4d4d; }
-  .open { color: #00ff9c; }
+.open { color: #2aff9d; }
+.closed { color: #ff4d4d; }
 
-  .card {
-    background: linear-gradient(180deg, #0f203a, #0a162a);
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  }
+.panel {
+  background: #111a2f;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
 
-  .row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    font-size: 16px;
-  }
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
 
-  .label {
-    color: #9db2d1;
-  }
+.label { color: #9aa7c7; }
+.value { font-weight: 600; }
 
-  .value {
-    font-weight: bold;
-  }
+.bullish { color: #2aff9d; }
+.bearish { color: #ff6b6b; }
+.neutral { color: #ffd166; }
 
-  .diff {
-    font-size: 20px;
-    margin-top: 12px;
-  }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
 
-  .bullish { color: #00ff9c; }
-  .bearish { color: #ff5c5c; }
-  .neutral { color: #ffd166; }
-
-  .footer {
-    margin-top: 18px;
-    font-size: 12px;
-    color: #7c8fb3;
-  }
+.footer {
+  font-size: 12px;
+  color: #7b87a7;
+  margin-top: 12px;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
-  <h1>HAARKS — Smart Trade</h1>
-  <div id="marketStatus" class="status"></div>
 
-  <div class="card">
-    <div class="row">
-      <div class="label">NIFTY 50 (Previous Close)</div>
-      <div class="value" id="nifty">25,232.50</div>
-    </div>
+<h1>HAARKS — Smart Trade</h1>
+<div id="marketStatus" class="status"></div>
 
-    <div class="row">
-      <div class="label">GIFT NIFTY</div>
-      <div class="value" id="gift">25,290.00</div>
-    </div>
-
-    <div class="row diff">
-      <div class="label">Difference</div>
-      <div class="value" id="diff"></div>
-    </div>
-
-    <div class="row diff">
-      <div class="label">Market Bias</div>
-      <div class="value" id="bias"></div>
-    </div>
+<!-- SIGNAL PANEL -->
+<div class="panel">
+  <div class="row">
+    <div class="label">NIFTY 50 (Previous Close)</div>
+    <div class="value" id="nifty">25,232.50</div>
   </div>
 
-  <div class="footer">
-    Data logic only • No broker connection • API-safe demo (In progress)<br>
-    © HAARKS
+  <div class="row">
+    <div class="label">GIFT NIFTY</div>
+    <div class="value" id="gift">25,290.00</div>
   </div>
 
-  <!-- LIVE GIFT NIFTY -->
-  <div style="margin-top:30px;">
-    <iframe
-      src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=1&theme=dark&style=1&timezone=Asia/Kolkata"
-      style="width:100%; height:420px; border-radius:14px; border:none;"
-      loading="lazy">
-    </iframe>
+  <div class="row">
+    <div class="label">Difference</div>
+    <div class="value" id="diff"></div>
+  </div>
+
+  <div class="row">
+    <div class="label">Market Bias</div>
+    <div class="value" id="bias"></div>
   </div>
 </div>
 
+<!-- CHARTS -->
+<div class="grid">
+
+  <!-- NIFTY 50 -->
+  <div class="panel">
+    <div class="label" style="margin-bottom:8px;">NIFTY 50 — Live</div>
+    <iframe
+      src="https://s.tradingview.com/widgetembed/?symbol=NSE:NIFTY&interval=5&theme=dark&style=1&timezone=Asia/Kolkata"
+      style="width:100%;height:360px;border:none;border-radius:10px;">
+    </iframe>
+  </div>
+
+  <!-- GIFT NIFTY -->
+  <div class="panel">
+    <div class="label" style="margin-bottom:8px;">GIFT NIFTY — Live</div>
+    <iframe
+      src="https://s.tradingview.com/widgetembed/?symbol=NSE:GIFTNIFTY&interval=5&theme=dark&style=1&timezone=Asia/Kolkata"
+      style="width:100%;height:360px;border:none;border-radius:10px;">
+    </iframe>
+  </div>
+
+</div>
+
+<div class="footer">
+Data logic only • No broker connection • API-safe demo (In progress)<br>
+© HAARKS
+</div>
+
+</div>
+
 <script>
-/* ===== MARKET STATUS (IST ONLY) ===== */
+/* ===== MARKET STATUS (IST) ===== */
 function isMarketOpenIST() {
-  const now = new Date();
-  const ist = new Date(
-    now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-  );
+  const ist = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
   const day = ist.getDay();
-  const hour = ist.getHours();
-  const min = ist.getMinutes();
+  const h = ist.getHours();
+  const m = ist.getMinutes();
 
   if (day === 0 || day === 6) return false;
-  if (hour < 9 || (hour === 9 && min < 15)) return false;
-  if (hour > 15 || (hour === 15 && min > 30)) return false;
+  if (h < 9 || (h === 9 && m < 15)) return false;
+  if (h > 15 || (h === 15 && m > 30)) return false;
   return true;
 }
 
 const statusEl = document.getElementById("marketStatus");
 if (isMarketOpenIST()) {
   statusEl.textContent = "🟢 Market is OPEN";
-  statusEl.classList.add("open");
+  statusEl.className = "status open";
 } else {
   statusEl.textContent = "🔴 Market is CLOSED";
-  statusEl.classList.add("closed");
+  statusEl.className = "status closed";
 }
 
-/* ===== CORE LOGIC ===== */
+/* ===== LOGIC ===== */
 const nifty = 25232.5;
 const gift = 25290.0;
-
 const diff = gift - nifty;
+
 document.getElementById("diff").innerText =
   (diff > 0 ? "+" : "") + diff.toFixed(2);
 
 const biasEl = document.getElementById("bias");
 
 if (diff > 20) {
-  biasEl.innerText = "Bullish → CALL bias";
+  biasEl.textContent = "Bullish → CALL bias";
   biasEl.className = "value bullish";
 } else if (diff < -20) {
-  biasEl.innerText = "Bearish → PUT bias";
+  biasEl.textContent = "Bearish → PUT bias";
   biasEl.className = "value bearish";
 } else {
-  biasEl.innerText = "Neutral → No trade zone";
+  biasEl.textContent = "Neutral → No trade zone";
   biasEl.className = "value neutral";
 }
 </script>
+
 </body>
 </html>
