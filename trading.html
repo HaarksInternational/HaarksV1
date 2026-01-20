@@ -1,31 +1,34 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>HAARKS Trading Helper</title>
+  <title>HAARKS — NIFTY Trading Helper</title>
 </head>
 
 <body style="
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   background:#0f172a;
   color:white;
-  padding:20px;
+  padding:24px;
 ">
 
 <h2>HAARKS — NIFTY Trading Helper</h2>
 
-<div id="status" style="margin-top:10px; font-size:18px;"></div>
+<div id="status" style="margin-top:8px; font-size:18px;"></div>
 
 <div id="analysis" style="
   margin-top:20px;
-  padding:16px;
-  border-radius:12px;
+  padding:18px;
+  border-radius:14px;
   background:#020617;
-  width:320px;
+  max-width:420px;
+  line-height:1.5;
 ">
 </div>
 
 <script>
-/* ===== MARKET TIME CHECK ===== */
+/* =========================================================
+   STEP 1 — MARKET TIME CHECK
+========================================================= */
 
 function isMarketOpen() {
   const now = new Date();
@@ -33,44 +36,90 @@ function isMarketOpen() {
   const hours = now.getHours();
   const minutes = now.getMinutes();
 
-  // Closed on Sat & Sun
+  // Market closed on Saturday & Sunday
   if (day === 0 || day === 6) return false;
 
-  // Market hours: 9:15 to 15:30
+  // Market time: 9:15 AM to 3:30 PM
   const time = hours * 60 + minutes;
   return time >= 555 && time <= 930;
 }
 
 const marketOpen = isMarketOpen();
 
-/* ===== DISPLAY STATUS ===== */
+/* =========================================================
+   STEP 2 — DAILY LEVELS (PLACEHOLDER FOR NOW)
+   These will later come from real market data
+========================================================= */
 
-document.getElementById("status").innerHTML =
-  marketOpen
-    ? "🟢 Market is OPEN"
-    : "🔴 Market is CLOSED";
+const previousHigh = "Previous Day High";
+const previousLow = "Previous Day Low";
 
-/* ===== BASIC THINKING (DUMMY LOGIC) ===== */
+/* =========================================================
+   STEP 3 — TRADING LOGIC (RULE BASED)
+========================================================= */
 
-let bias = "WAIT";
-let entry = "-";
-let stopLoss = "-";
-let target = "-";
+let marketBias = "";
+let callPlan = "";
+let putPlan = "";
 
 if (marketOpen) {
-  bias = "WAIT (Live data will come later)";
+
+  marketBias = "LIVE MARKET — WAIT FOR CONFIRMATION";
+
+  callPlan = `
+📈 <b>CALL (CE)</b><br>
+Entry: Price breaks & holds above <b>${previousHigh}</b><br>
+Stop Loss: Below breakout rejection candle<br>
+Target: Minimum <b>1:2 Risk–Reward</b><br>
+Condition: Avoid chasing first spike
+`;
+
+  putPlan = `
+📉 <b>PUT (PE)</b><br>
+Entry: Price breaks & holds below <b>${previousLow}</b><br>
+Stop Loss: Above breakdown rejection candle<br>
+Target: Minimum <b>1:2 Risk–Reward</b><br>
+Condition: Trade only with momentum
+`;
+
 } else {
-  bias = "PLAN FOR NEXT DAY";
-  entry = "Break previous high / low";
-  stopLoss = "Below rejection candle";
-  target = "1:2 Risk Reward";
+
+  marketBias = "MARKET CLOSED — PLAN FOR NEXT DAY";
+
+  callPlan = `
+📈 <b>CALL (CE)</b><br>
+Entry: Only above <b>${previousHigh}</b><br>
+Stop Loss: Below fake breakout / rejection<br>
+Target: Minimum <b>1:2 Risk–Reward</b><br>
+Note: Trade only after confirmation
+`;
+
+  putPlan = `
+📉 <b>PUT (PE)</b><br>
+Entry: Only below <b>${previousLow}</b><br>
+Stop Loss: Above fake breakdown / rejection<br>
+Target: Minimum <b>1:2 Risk–Reward</b><br>
+Note: Avoid trades inside range
+`;
 }
 
+/* =========================================================
+   STEP 4 — DISPLAY OUTPUT
+========================================================= */
+
+document.getElementById("status").innerHTML =
+  marketOpen ? "🟢 Market is OPEN" : "🔴 Market is CLOSED";
+
 document.getElementById("analysis").innerHTML = `
-<b>Market Bias:</b> ${bias}<br><br>
-<b>Entry:</b> ${entry}<br>
-<b>Stop Loss:</b> ${stopLoss}<br>
-<b>Target:</b> ${target}
+<b>Market Bias:</b> ${marketBias}<br><br>
+
+<div style="margin-bottom:16px;">
+${callPlan}
+</div>
+
+<div>
+${putPlan}
+</div>
 `;
 </script>
 
